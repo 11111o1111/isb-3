@@ -13,6 +13,23 @@ def generation():
     save_text(asymmetric_encrypt(public_key, symmetric_key), settings['symmetric_key'])
 
 
+def encryption():
+    private_key = deserialize_private_key(settings['private_key'])
+    c_key = read_text(settings['symmetric_key'])
+    symmetric_key = asymmetric_decrypt(private_key, c_key)
+    text = read_text(settings['initial_file'])
+    c_text = symmetric_encryption(symmetric_key, text)
+    save_text(c_text, settings['encrypted_text'])
+
+
+def decryption():
+    private_key = deserialize_private_key(settings['private_key'])
+    c_key = read_text(settings['symmetric_key'])
+    symmetric_key = asymmetric_decrypt(private_key, c_key)
+    c_text = read_text(settings['encrypted_text'])
+    text = symmetric_decryption(symmetric_key, c_text)
+    save_text(text, settings['decrypted_text'])
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -20,7 +37,8 @@ if __name__ == "__main__":
                          help='Использует пользовательский файл с настройками, необходимо указать путь к файлу')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('-gen', '--generation', action="store_true", help='Запускает режим генерации ключей')
-   
+    group.add_argument('-enc', '--encryption', action="store_true", help='Запускает режим шифрования')
+    group.add_argument('-dec', '--decryption', action="store_true", help='Запускает режим дешифрования')
     args = parser.parse_args()
     if args.custom:
         settings = read_settings(args.custom)
@@ -29,4 +47,7 @@ if __name__ == "__main__":
     if settings:
         if args.generation:
             generation()
-        
+        elif args.encryption:
+            encryption()
+        else:
+            decryption()
