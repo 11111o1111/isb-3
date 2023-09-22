@@ -6,14 +6,26 @@ from scripts.asymmetric_encryption import generate_keys, asymmetric_decrypt, asy
 from scripts.settings import read_settings
 
 
-def generation():
+def generation() -> None:
+    """
+    Функция генерирует ключи симметричного и ассиметричного алгоритмов шифрования
+    и сериализует ключи асимметричного алгоритма шифрования,
+    сохраняет симметричный ключ
+    :return: Функция ничего не возвращает
+    """
     symmetric_key = generate_symmetric_key(settings['key_length'])
     private_key, public_key = generate_keys()
     serialize_asymmetric_keys(public_key, private_key, settings['public_key'], settings['private_key'])
     save_text(asymmetric_encrypt(public_key, symmetric_key), settings['symmetric_key'])
 
 
-def encryption():
+def encryption() -> None:
+    """
+    Функция десериализует приватный ключ,
+    получает симметричный ключ,
+    шифрует и сохраняет текст
+    :return: Функция ничего не возвращает
+    """
     private_key = deserialize_private_key(settings['private_key'])
     c_key = read_text(settings['symmetric_key'])
     symmetric_key = asymmetric_decrypt(private_key, c_key)
@@ -22,7 +34,13 @@ def encryption():
     save_text(c_text, settings['encrypted_text'])
 
 
-def decryption():
+def decryption() -> None:
+    """
+    Функция десериализует приватный ключ,
+    получает симметричный ключ,
+    дешифрует и сохраняет текст
+    :return: Функция ничего не возвращает
+    """
     private_key = deserialize_private_key(settings['private_key'])
     c_key = read_text(settings['symmetric_key'])
     symmetric_key = asymmetric_decrypt(private_key, c_key)
@@ -44,10 +62,10 @@ if __name__ == "__main__":
         settings = read_settings(args.custom)
     else:
         settings = read_settings()
-    if settings:
-        if args.generation:
+    match settings:
+        case args.generation:
             generation()
-        elif args.encryption:
+        case args.encryption:
             encryption()
-        else:
+        case args.decryption():
             decryption()
